@@ -55,13 +55,13 @@ function createCube() {
     //  创建图形
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     // 1. 加载不同纹理图片并创建材质对象 6 个,（x 正负，y 正负，z 正负）
-    const imgUrlArr = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']
-
+    // const imgUrlArr = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']
+    const imgUrlArr = ['x.jpg', '-x.jpg', 'y.jpg', '-y.jpg', 'z.jpg', '-z.jpg']
     // 2. 纹理加载器
     const textureLoader = new THREE.TextureLoader()
 
     // 设置当前纹理加载器公共的基础路径
-    textureLoader.setPath('image/park/')
+    textureLoader.setPath('image/class/')
 
     // 创建材质
     const materialArr = imgUrlArr.map(item => {
