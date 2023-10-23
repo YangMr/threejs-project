@@ -1,12 +1,10 @@
-// 目标：立方体贴图：给六个面设置不同的图片
-// 使用：
-// 1.立方缓冲几何体
-
-// 2.加载不同纹理图片并创建材质对象
-
-// 3.创建网格物体并加入场景
-
-
+// 目标：初始化立方体
+// 1. three.js 三要素
+// 2. 轨道控制器
+// 3. 坐标轴
+// 4. 场景适配
+// 5. 立方体创建
+// 6. 渲染循环
 
 import "./style.css"
 
@@ -54,28 +52,10 @@ function init() {
 function createCube() {
     //  创建图形
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    // 1. 加载不同纹理图片并创建材质对象 6 个,（x 正负，y 正负，z 正负）
-    const imgUrlArr = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']
-
-    // 2. 纹理加载器
-    const textureLoader = new THREE.TextureLoader()
-
-    // 设置当前纹理加载器公共的基础路径
-    textureLoader.setPath('image/park/')
-
     // 创建材质
-    const materialArr = imgUrlArr.map(item => {
-        // 创建纹理图片对象
-        const texture = textureLoader.load(item)
-        return new THREE.MeshBasicMaterial({
-            map: texture,
-            side: THREE.DoubleSide
-        });
-    })
-    console.log("materialArr", materialArr)
-
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     // 创建物体网格对象, 并且图形与材质加载的物体网格对象中
-    cube = new THREE.Mesh(geometry, materialArr);
+    cube = new THREE.Mesh(geometry, material);
     // 将物体添加到场景中
     scene.add(cube);
 }
