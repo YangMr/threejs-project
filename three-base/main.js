@@ -1,14 +1,9 @@
-// 目标：基于 three.js 提供的构造函数，创建线段
+// 目标：把原生 DOM 标签转换后加入到 3D 场景空间中显示
+// 使用：
 
-// [使用](https://threejs.org/docs/index.html)：
+// 1.准备原生 DOM 标签和内容样式
 
-// 1.创建几何图形
-
-// 2.创建线材质
-
-// 3.创建线物体对象
-
-// 注意：线物体，也需要使用线材质配合
+// 2.引入 CSS3DObject 和 [CSS3DRenderer](https://threejs.org/docs/index.html) 进行渲染
 
 import "./style.css"
 
@@ -18,11 +13,14 @@ import * as THREE from "three"
 // 引入轨道控制器
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// 引入3d转换器与渲染器
+import { CSS3DObject, CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js'
+
 // 引入性能监视器的stats组件
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 
-// 创建场景、摄像机、渲染器(画布)的全局变量
-let scene, camera, renderer
+// 创建场景、摄像机、渲染器(画布), css3d渲染器的全局变量
+let scene, camera, renderer, labelRenderer
 // 创建物体的全局变量
 let cube
 // 创建轨道控制器的全局变量
@@ -40,7 +38,9 @@ function init() {
     // 创建摄像机
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 
-
+    // 1. 调整摄像机位置到盒子中间
+    // 不能给 0 的原因：轨道控制器内部会取出摄像机初始位置坐变化
+    // camera.position.z = 0.1
     camera.position.z = 5
 
 
@@ -150,6 +150,32 @@ function createSphere() {
     scene.add(sphere);
 }
 
+// 创建一条连续的线
+function createLine() {
+    const points = []
+    points.push(new THREE.Vector3(-1, 0, 0));
+    points.push(new THREE.Vector3(0, 1, 0));
+    points.push(new THREE.Vector3(1, 1, 1));
+    points.push(new THREE.Vector3(2, 2, 2));
+
+    // 创建图形
+    const geometry = new THREE.BufferGeometry().setFromPoints(points)
+
+    // 创建材质
+    const material = new THREE.LineBasicMaterial({
+        color: 0xff6600
+    });
+
+    // 创建线物体
+    // const line = new THREE.Line(geometry, material)
+    // const line = new THREE.LineLoop(geometry, material)
+    const line = new THREE.LineSegments(geometry, material)
+
+
+    // 添加到场景
+    scene.add(line)
+}
+
 // 创建球形缓冲几何体
 function createSphereCopy() {
     // 创建图形
@@ -164,12 +190,137 @@ function createSphereCopy() {
     scene.add(sphere);
 }
 
+// 创建球形缓冲几何体, 并且进行全景的贴图
+function createMap() {
+    //  创建图形
+    const geometry = new THREE.SphereGeometry(1, 32, 16);
+    // 创建纹理加载器(使用纹理加载器并创建网格材质对象)
+    // new THREE.TextureLoader().setPath(image/earth) // 设置孩子公共的baseurl
+    const texture = new THREE.TextureLoader().load("image/earth/earth.png");
+    // 创建材质
+    const material = new THREE.MeshBasicMaterial({
+        map: texture
+    });
+    // 创建物体
+    const sphere = new THREE.Mesh(geometry, material);
+    // 创建场景
+    scene.add(sphere);
+}
+
+// 创建立方缓冲体并进行贴图
+function createCubeAndImage() {
+    // 图片路径数组(加载不同纹理图片并创建材质对象 6 个) x 前后 y 前后 z前后 
+    const imgUrlArr = ["posx.jpg", "negx.jpg", "posy.jpg", "negy.jpg", "posz.jpg", "negz.jpg"]
+
+    // 创建图形
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+    // 使用纹理加载器加载图片
+    const textureLoader = new THREE.TextureLoader() // 初始化纹理加载器
+    textureLoader.setPath("image/park/") // 设置公共的资源路径
+
+    const materialArr = imgUrlArr.map(item => {
+        // 加载图片
+        const texture = textureLoader.load(item)
+
+        // three.js 颜色通道为 rgb 颜色（为了防止图片太浅）
+        texture.colorSpace = THREE.SRGBColorSpace
+
+        // 创建材质
+        return new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide
+        });
+    })
+
+    // 创建物体
+    cube = new THREE.Mesh(geometry, materialArr);
+
+    // 2. 调整立方体沿着 z 轴做 -1 缩小（镜面翻转）
+    cube.scale.set(1, 1, -1)
+
+    // 添加到场景
+    scene.add(cube)
+}
+
+// 创建平面网格物体, 并将视频进行加载
+function createPlaneMap() {
+    // 创建图形
+    const geometry = new THREE.PlaneGeometry(1, 0.5);
+
+    // 创建视频标签
+    const video = document.createElement("video")
+    // 设置视频资源路径
+    video.src = "video/mouse_cat.mp4"
+    // 设置视频默认静音
+    video.muted = true
+    // 监听资源加载完毕进行播放
+    video.addEventListener("loadedmetadata", () => {
+        video.play()
+    })
+
+    // 创建视频纹理加载器
+    const texture = new THREE.VideoTexture(video)
+
+
+    // 创建材质
+    const material = new THREE.MeshBasicMaterial({
+        map: texture
+    });
+    // 创建物体
+    const plane = new THREE.Mesh(geometry, material);
+    // 添加到场景
+    scene.add(plane);
+
+    // 创建button元素
+    const button = document.createElement("button")
+    // 设置button元素的文本
+    button.innerHTML = "播放"
+    // 设置button样式为固定定位
+    button.style.position = "fixed"
+    button.style.left = "0"
+    button.style.bottom = "0"
+    // 添加到body中
+    document.body.appendChild(button)
+    // 监听按钮点击事件
+    button.addEventListener("click", () => {
+        video.muted = !video.muted
+    })
+}
+
+// 将原生dom转换并渲染到3d场景
+function domTo3D() {
+    // 1. 准备原生 DOM 标签和内容样式
+    const tag = document.createElement("span")
+    tag.innerHTML = "我是文字"
+    tag.style.color = "white"
+
+    // 2. 将2d转为3d
+    const tag3d = new CSS3DObject(tag)
+    tag3d.scale.set(1 / 16, 1 / 16, 1 / 16)
+    scene.add(tag3d)
+
+    // 3. 通过3d渲染器渲染到浏览器
+    labelRenderer = new CSS3DRenderer()
+    labelRenderer.setSize(window.innerWidth, window.innerHeight)
+    labelRenderer.domElement.style.pointerEvents = 'none' // 在什么条件下让标签触发鼠标交互事件
+    labelRenderer.domElement.style.position = "fixed"
+    labelRenderer.domElement.style.left = 0;
+    labelRenderer.domElement.style.top = 0;
+    document.body.appendChild(labelRenderer.domElement)
+}
+
 // 创建轨道控制器
 function createControl() {
     //  创建轨道控制器
     controls = new OrbitControls(camera, renderer.domElement)
     // 开启阻尼效果
     controls.enableDamping = true
+
+    // 设置摄像机向外移动的距离
+    // controls.maxDistance = 0.1
+    // 设置摄像机向内移动的距离
+    // controls.minDistance = 0.1
 }
 
 // 创建循环渲染方法
@@ -178,10 +329,12 @@ function renderLoop() {
     requestAnimationFrame(renderLoop)
     // 手动更新场景(调用控制器的update方法)
     controls.update()
+
     // 手动更新性能监视器
     stats.update()
     // 将场景与摄像机渲染到画布上
     renderer.render(scene, camera)
+    labelRenderer.render(scene, camera)
 }
 
 // 创建坐标轴
@@ -251,10 +404,15 @@ init()
 createGroup()
 
 // 调用创建物体方法
-createCube()
-createCircle()
-createSphere()
-createSphereCopy()
+// createCube()
+// createCircle()
+// createSphere()
+// createSphereCopy()
+// createLine()
+// createMap()
+// createCubeAndImage()
+// createPlaneMap()
+domTo3D()
 
 // 调用创建轨道控制器方法
 createControl()
