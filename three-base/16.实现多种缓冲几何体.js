@@ -1,14 +1,14 @@
-// 目标：基于 three.js 提供的构造函数，创建线段
+// 目标：基于 three.js 的 Group 组物体，来统一管理子物体
+// [使用](https://threejs.org/docs/)：
 
-// [使用](https://threejs.org/docs/index.html)：
+// 1.新建分组
 
-// 1.创建几何图形
+// 2.分组中加入物体
 
-// 2.创建线材质
+// 3.把分组加入到场景中
 
-// 3.创建线物体对象
+// 注意：Group 类型 Object3D，拥有相关属性和方法
 
-// 注意：线物体，也需要使用线材质配合
 
 import "./style.css"
 
@@ -92,9 +92,9 @@ function createCube() {
         // 创建图形
         const geometry = new THREE.BoxGeometry(item.w, item.h, item.d);
         // 创建材质
-        const material = new THREE.PointsMaterial({ color: item.color, size: 0.1 });
+        const material = new THREE.MeshBasicMaterial({ color: item.color });
         // 创建物体网格对象, 并且图形与材质加载的物体网格对象中
-        cube = new THREE.Points(geometry, material);
+        cube = new THREE.Mesh(geometry, material);
         // 设置立方体的坐标
         cube.position.set(item.x, item.y, item.z)
 
@@ -140,26 +140,12 @@ function createCircle() {
 function createSphere() {
     // 创建图形
     const geometry = new THREE.SphereGeometry(2, 32, 16);
-    // 创建材质(点材质)
-    const material = new THREE.PointsMaterial({ color: 0x6600ff, size: 0.05 });
-    // 创建点对象
-    const sphere = new THREE.Points(geometry, material);
+    // 创建材质
+    const material = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+    // 创建材质
+    const sphere = new THREE.Mesh(geometry, material);
     // 设置球体坐标
     sphere.position.set(-5, -5, -5)
-    // 添加到场景
-    scene.add(sphere);
-}
-
-// 创建球形缓冲几何体
-function createSphereCopy() {
-    // 创建图形
-    const geometry = new THREE.SphereGeometry(2, 32, 16);
-    // 创建材质(点材质)
-    const material = new THREE.LineBasicMaterial({ color: 0x6600ff, linewidth: 1, });
-    // 创建点对象
-    const sphere = new THREE.Line(geometry, material);
-    // 设置球体坐标
-    sphere.position.set(7, 9, 3)
     // 添加到场景
     scene.add(sphere);
 }
@@ -254,7 +240,6 @@ createGroup()
 createCube()
 createCircle()
 createSphere()
-createSphereCopy()
 
 // 调用创建轨道控制器方法
 createControl()

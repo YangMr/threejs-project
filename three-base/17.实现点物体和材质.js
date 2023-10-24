@@ -1,14 +1,14 @@
-// 目标：基于 three.js 提供的构造函数，创建线段
+// 目标： 除了网格面立体等，还可以绘制点物体，也要借助 three.js 提供的构造函数
 
-// [使用](https://threejs.org/docs/index.html)：
+// [使用](https://threejs.org/docs/index.html?q=Point)：
 
 // 1.创建几何图形
 
-// 2.创建线材质
+// 2.创建点材质
 
-// 3.创建线物体对象
+// 3.创建点物体对象
 
-// 注意：线物体，也需要使用线材质配合
+// 注意：点物体，需要用点对应的材质
 
 import "./style.css"
 
@@ -150,20 +150,6 @@ function createSphere() {
     scene.add(sphere);
 }
 
-// 创建球形缓冲几何体
-function createSphereCopy() {
-    // 创建图形
-    const geometry = new THREE.SphereGeometry(2, 32, 16);
-    // 创建材质(点材质)
-    const material = new THREE.LineBasicMaterial({ color: 0x6600ff, linewidth: 1, });
-    // 创建点对象
-    const sphere = new THREE.Line(geometry, material);
-    // 设置球体坐标
-    sphere.position.set(7, 9, 3)
-    // 添加到场景
-    scene.add(sphere);
-}
-
 // 创建轨道控制器
 function createControl() {
     //  创建轨道控制器
@@ -254,7 +240,6 @@ createGroup()
 createCube()
 createCircle()
 createSphere()
-createSphereCopy()
 
 // 调用创建轨道控制器方法
 createControl()
