@@ -2,3 +2,9 @@
   margin: 0;
   padding: 0;
 }
+
+.custom-text {
+  padding: 10px;
+  border: 1px solid #fff;
+
+}

@@ -1,16 +1,9 @@
-// 目标：了解如何与 three.js 的 3D 物体进行交互
-// 类型1：原生 DOM 支持原生事件（设置 pointerEvents = ‘all’）
+// 目标：把原生 DOM 标签转换后加入到 3D 场景空间中显示
+// 使用：
 
-// 类型2：three.js 物体使用光射投影 [Raycaster](https://threejs.org/docs/index.html)
+// 1.准备原生 DOM 标签和内容样式
 
-// 核心：鼠标位置归一化为设备坐标，配合摄像机计算收集鼠标移过哪些物体
-
-// 公式：
-
-// x 点坐标：(浏览器 x 轴坐标点 / 画布宽度) * 2 - 1
-
-// y 点坐标：- (浏览器 y 轴坐标点 / 画布高度) * 2 + 1
-
+// 2.引入 CSS3DObject 和 [CSS3DRenderer](https://threejs.org/docs/index.html) 进行渲染
 
 import "./style.css"
 
@@ -139,8 +132,6 @@ function createCircle() {
     // 创建物体网格对象, 并将图形与材质渲染到物体网格对象
     const circle = new THREE.Mesh(geometry, material);
     circle.position.set(10, 10, 10)
-    circle.name = "circle1"
-
     // 将物体添加到场景
     scene.add(circle)
 }
@@ -319,54 +310,6 @@ function domTo3D() {
     document.body.appendChild(labelRenderer.domElement)
 }
 
-// 将原生dom转换并渲染到3d场景, 并且给原生DOM添加点击时间
-function domTo3DCopy() {
-    // 1. 创建原生dom标签
-    const tag = document.createElement("div")
-    tag.innerHTML = "前进"
-    tag.className = "custom-text"
-    tag.style.color = "white"
-    tag.style.cursor = "pointer";
-    tag.addEventListener("click", () => {
-        alert("123")
-    })
-
-    // 2. 将2d转化为3d
-    const tag3d = new CSS3DObject(tag)
-    tag3d.scale.set(1 / 40, 1 / 40, 1 / 40)
-    scene.add(tag3d)
-
-    // 3. 将3d文本场景渲染到到浏览器  
-    labelRenderer = new CSS3DRenderer()
-    labelRenderer.setSize(window.innerWidth, window.innerHeight)
-    labelRenderer.domElement.style.pointerEvents = 'none'
-    labelRenderer.domElement.style.position = "fixed"
-    labelRenderer.domElement.style.left = 0
-    labelRenderer.domElement.style.top = 0
-    document.body.appendChild(labelRenderer.domElement)
-
-}
-
-// 实现3d物体添加点击事件
-function bindClick() {
-    // 1. 先给window绑定点击事件
-    window.addEventListener("click", (event) => {
-        const raycaster = new THREE.Raycaster();
-        const pointer = new THREE.Vector2();
-
-        // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(pointer, camera)
-
-        // 获取这条线穿过了哪些物体，收集成一个数组
-        const list = raycaster.intersectObjects(scene.children)
-        const e = list.find(item => item.object.name === "circle1")
-        if (e) alert("666")
-    })
-}
-
 // 创建轨道控制器
 function createControl() {
     //  创建轨道控制器
@@ -391,7 +334,6 @@ function renderLoop() {
     stats.update()
     // 将场景与摄像机渲染到画布上
     renderer.render(scene, camera)
-    // 将场景与摄像机渲染浏览器上面
     labelRenderer.render(scene, camera)
 }
 
@@ -463,18 +405,14 @@ createGroup()
 
 // 调用创建物体方法
 // createCube()
-createCircle()
+// createCircle()
 // createSphere()
 // createSphereCopy()
 // createLine()
 // createMap()
 // createCubeAndImage()
 // createPlaneMap()
-// domTo3D()
-domTo3DCopy()
-
-// 调用给3d物体添加点击事件方法
-bindClick()
+domTo3D()
 
 // 调用创建轨道控制器方法
 createControl()
